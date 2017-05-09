@@ -41,7 +41,24 @@ struct SB_SYSTEM_CONFIG
 	char 			website[32];
 	char 			contact[32];
 	char			id [4];		
-	char			User_Config_Area_3 [64];// User Define Config Area
+//	char			User_Config_Area_3 [64]; // User Define Config Area
+//-----------------------------(ORG)!
+	
+
+//----------------------
+// GDM_EC_ for Eddy v2.5
+//----------------------
+	char			GDM_XXzero[16];			//16	// "GDM_EC:: zero_position!
+	char			GDM_YYzero[16];			//16	// "GDM_EC:: zero_position!
+	char			GDM_DDzero[16];			//16	// "GDM_EC:: zero_position!
+	//...++[48]byte...
+	char			GDM_USEmode;			//		// "GDM_EC:: USE-GPS/Encoder! {-1:none 1:ON 0:OFF(encoder)}
+	//...++[49]byte...
+	
+	//char			dummy[16];  //<---(64-48)=468
+	char			dummy[15];  //<---#GDM_USEmode
+	
+	
 };
 
 //---------------------------------------------------------------------------------

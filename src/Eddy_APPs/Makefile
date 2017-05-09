@@ -1,7 +1,7 @@
 CROSS		= /opt/lemonix/cdt/bin/arm-linux-
 LDFLAGS 	+= -L/opt/lemonix/cdt/lib -L/opt/lemonix/cdt/bin
 IFLAGS 		+= -I/opt/lemonix/cdt/include  -I./include
-CFLAGS 		=	-O2 -g  -Wall -Wno-nonnull
+CFLAGS 		=	-lm -O2 -g  -Wall -Wno-nonnull
 DEST		= ../../ramdisk/root/sbin	
 DEST_ETC	= ../../ramdisk/root/etc
 
@@ -9,20 +9,66 @@ CC		=	$(CROSS)gcc
 STRIP	=	$(CROSS)strip
 AR		= 	$(CROSS)ar
 
-TARGET		=	eddy					pinetd						def						\
-				ddns_agent				upgrade						upgradetftp				\
-				wifi					test_nand					test_mmc				\
-				test_rtc				test_sio					test_adc				\
-				test_gpio_led			test_keypad 				test_lcd				\
-				test_dio				test_gpio_pin				test_bluetooth			\
-				test_spi_eeprom			test_tcp_server				test_tcp_client			\
-				test_serial				test_read_config			test_serial_to_lan-2	\
-				test_serial_to_lan-1	test_udp_server				test_udp_client			\
-				testdk		
-				
+TARGET		=	eddy			pinetd					def			\
+			ddns_agent		upgrade					upgradetftp		\
+			wifi			test_nand				test_mmc		\
+			test_rtc		test_sio				test_adc		\
+			test_gpio_led		test_keypad 				test_lcd		\
+			test_dio		test_gpio_pin				test_bluetooth		\
+			test_spi_eeprom		test_tcp_server				test_tcp_client		\
+			test_serial		test_read_config			test_serial_to_lan-2	\
+			test_serial_to_lan-1	test_udp_server				test_udp_client		\
+			testdk 	    udp_DRFG  udp_DRFB  udp_DRFGmain  udp_DVSCPU  tcp16broadcast  udp_GDM_EC \
+			testUDPhosts  tcp32broadcast  tcp_client  udp_DPSscan
+
 LIBS		=   -lrt SB_APIs/SB_APIs.a
 
 all : $(TARGET)
+
+udp_DPSscan : udp_DPSscan.o 
+	rm -f $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(IFLAGS) -o $@  $@.o  $(LIBS) 
+	$(STRIP) $@
+
+tcp_client : tcp_client.o 
+	rm -f $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(IFLAGS) -o $@  $@.o  $(LIBS) 
+	$(STRIP) $@
+
+tcp32broadcast : tcp32broadcast.o 
+	rm -f $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(IFLAGS) -o $@  $@.o  $(LIBS) 
+	$(STRIP) $@
+
+udp_GDM_EC : udp_GDM_EC.o 
+	rm -f $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(IFLAGS) -o $@  $@.o  $(LIBS) 
+	$(STRIP) $@
+
+tcp16broadcast : tcp16broadcast.o 
+	rm -f $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(IFLAGS) -o $@  $@.o  $(LIBS) 
+	$(STRIP) $@
+	
+udp_DVSCPU : udp_DVSCPU.o 
+	rm -f $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(IFLAGS) -o $@  $@.o  $(LIBS) 
+	$(STRIP) $@
+
+udp_DRFGmain : udp_DRFGmain.o 
+	rm -f $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(IFLAGS) -o $@  $@.o  $(LIBS) 
+	$(STRIP) $@
+
+udp_DRFB : udp_DRFB.o 
+	rm -f $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(IFLAGS) -o $@  $@.o  $(LIBS) 
+	$(STRIP) $@
+	
+udp_DRFG : udp_DRFG.o 
+	rm -f $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(IFLAGS) -o $@  $@.o  $(LIBS) 
+	$(STRIP) $@
 
 test_tcp_client : test_tcp_client.o 
 	rm -f $@
@@ -156,7 +202,7 @@ ddns_agent : ddns_agent.o
 
 upgrade : upgrade.o 
 	rm -f $@
-	$(CC) $(CFLAGS) $(LDFLAGS) $(IFLAGS) -o $@  $@.o 
+	$(CC) $(CFLAGS) $(LDFLAGS) $(IFLAGS) -o $@  $@.o $(LIBS)
 	$(STRIP) $@
 	
 upgradetftp : upgradetftp.o 
@@ -165,6 +211,11 @@ upgradetftp : upgradetftp.o
 	$(STRIP) $@
 		
 rt_test : rt_test.o 
+	rm -f $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(IFLAGS) -o $@  $@.o $(LIBS)
+	$(STRIP) $@
+
+testUDPhosts : testUDPhosts.o 
 	rm -f $@
 	$(CC) $(CFLAGS) $(LDFLAGS) $(IFLAGS) -o $@  $@.o $(LIBS)
 	$(STRIP) $@

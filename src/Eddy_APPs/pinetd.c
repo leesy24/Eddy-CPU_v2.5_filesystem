@@ -89,12 +89,49 @@ unsigned int timer;
 		
 	//--------------------------------------------------------------< PortView Applition launch
 	if (CFG_SYS.portview[0] != 0x00) PORTVIEW_PID = Task_Launch ("/sbin/portview", 0);
+	
+
+
+	//=================[GDM-Init]=============================================//
+	//sleep (1);
+	if ( !strncmp( CFG_SYS.device_name, "GDM_EC", 6) )
+	{
+		// !"""( # cp -rp udp_GDM_EC udp )"""
+		
+		sprintf(cmd, "/bin/cp -rp /sbin/udp_GDM_EC /sbin/udp ");
+		system(cmd);
+		
+		sprintf(cmd, "echo RUN--udp_GDM_EC > /sbin/udp_GDM_EC__UseRUN ");
+		system(cmd);
+	}
+	else if ( !strncmp( CFG_SYS.device_name, "DPS2590", 7) )
+	{
+		// !"""( # cp -rp udp_DPSscan udp )"""
+		
+		sprintf(cmd, "/bin/cp -rp /sbin/udp_DPSscan /sbin/udp ");
+		system(cmd);
+		
+		sprintf(cmd, "echo RUN--udp_DPSscan > /sbin/udp_DPSscan__UseRUN ");
+		system(cmd);
+	}
+	else
+	{
+		sprintf(cmd, "/bin/cp -rp /sbin/udp_ORG /sbin/udp ");
+		system(cmd);
+		
+		sprintf(cmd, "echo RUN--udp_ORG > /sbin/udp_ORG__UseRUN ");
+		system(cmd);
+	}
+	SB_msleep (100);
+	//=================[GDM-Init]=============================================//
+
 
 	//--------------------------------------------------------------< Serial Application launch
 	for (no=0; no<SB_MAX_SIO_PORT; no++)
 		{	
 		Fork_Processor (no);
 		}
+
 
 	//---------------------------------------------------------------------- LAN ---------
 	if (CFG_GPIO.lan == SB_ENABLE)	
@@ -223,6 +260,36 @@ unsigned int timer;
 	//
 	//====================================================================================>
 
+
+	//if (CFG_SIO[0].protocol == SB_DISABLE_MODE) Task_Launch ("/sbin/s2lan", 0);   //__1__
+	//if (CFG_SIO[2].protocol == SB_DISABLE_MODE) Task_Launch ("/sbin/test_serial", 2);   //__1__
+	//if (CFG_SIO[3].protocol == SB_DISABLE_MODE) Task_Launch ("/sbin/test_serial", 3);   //__1__
+
+	if ( (CFG_SIO[2].protocol == SB_DISABLE_MODE) )
+	{
+			if ( !strncmp( CFG_SYS.device_name, "DRFG", 4) )
+								Task_Launch ("/sbin/udp_DRFG", 2);
+								
+			if ( !strncmp( CFG_SYS.device_name, "DRFB", 4) )
+								Task_Launch ("/sbin/udp_DRFB", 2);
+	}
+	//
+	if ( (CFG_SIO[3].protocol == SB_DISABLE_MODE) )
+	{
+			if ( !strncmp( CFG_SYS.device_name, "DRFG", 4) )
+								Task_Launch ("/sbin/udp_DRFG", 3);
+			if ( !strncmp( CFG_SYS.device_name, "DRFB", 4) )
+								Task_Launch ("/sbin/udp_DRFB", 3);
+	}
+	
+	if ( (CFG_SIO[0].protocol == SB_DISABLE_MODE) )
+	{
+			if ( !strncmp( CFG_SYS.device_name, "DVSCPU", 6) )
+								Task_Launch ("/sbin/udp_DVSCPU", 0);
+	}
+	
+
+
 	//--------------------------------------- WEB Server       
     if (CFG_SYS.web_server == SB_ENABLE)                                                                     
         system ("/usr/local/sbin/thttpd -C  /etc/thttpd.conf");
@@ -247,6 +314,49 @@ unsigned int timer;
 		{
 		Task_Launch ("/sbin/wifi", 0); 	
 		}	
+
+
+	//=================[GDM-Init]=============================================//
+		sleep (1);
+		
+		if ( !strncmp( CFG_SYS.device_name, "GDM_BASE", 8) )
+		{
+				//sprintf(cmd, "cd /etc ");
+				//system(cmd);
+				sprintf(cmd, "/bin/cp /flash/GDM_BASE.sh /etc/GDM_start.sh ");
+				system(cmd);
+				sprintf(cmd, "/usr/bin/dos2unix /etc/GDM_start.sh ");
+				system(cmd);
+				sprintf(cmd, "/bin/chmod 777 /etc/GDM_start.sh ");
+				system(cmd);			
+				sprintf(cmd, "/etc/GDM_start.sh ");
+				system(cmd);
+				
+				sleep (1);
+		}
+		else
+		{
+			if ( !strncmp( CFG_SYS.device_name, "GDM_ROVER", 9) )
+			{
+				//sprintf(cmd, "cd /sbin/def port 1 speed 9600 ");
+				//system(cmd);
+				sprintf(cmd, "/bin/cp /flash/GDM_ROVER.sh /etc/GDM_start.sh ");
+				system(cmd);
+				sprintf(cmd, "/usr/bin/dos2unix /etc/GDM_start.sh ");
+				system(cmd);
+				sprintf(cmd, "/bin/chmod 777 /etc/GDM_start.sh ");
+				system(cmd);			
+				sprintf(cmd, "/etc/GDM_start.sh ");
+				system(cmd);
+				//sprintf(cmd, "cd /sbin/def port 1 speed 115200 ");
+				//system(cmd);
+				
+				sleep (1);
+			}
+		}
+		//
+	//=================[GDM-Init]=============================================//
+
 
 	fd = open (SB_GPIO_DEVICE, O_RDWR);
 	//-------------------------------------------------------------< Ready LED and Reset button 

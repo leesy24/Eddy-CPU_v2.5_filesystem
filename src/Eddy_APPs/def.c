@@ -143,13 +143,16 @@ struct SB_WIFI_CONFIG			CFG_WIFI;
 
 
 void help();
+//--
 void view_management ();
 void view_port ();
 void view_gpio();
 void view_snmp();
 void view_wan();
 void view_lan();
+//--
 void make_cfg ();
+//--
 int set_wan (int gc, char *gv1, char *gv2);
 int set_wifi (int gc, char *gv1, char *gv2);
 int set_lan (int gc, char *gv1, char *gv2);
@@ -162,6 +165,9 @@ int main (int argc, char *argv[]);
 void factory_default (char *MAC);
 void view_dio();
 void view_wifi();
+
+void view_GDM_GPS();
+
 
 int Product_ID;
 //=============================================================================
@@ -238,6 +244,9 @@ int i;
 			view_port ();
 			view_gpio();
 			if (Product_ID != EDDY_S4M) view_dio ();
+			
+			view_GDM_GPS();
+			
 			return 0;
 			}	
 		if (!strncmp ("management", argv[2], 2))  view_management ();
@@ -248,6 +257,9 @@ int i;
 		if (!strncmp ("gpio",   	argv[2], 2))  view_gpio ();		
 		if (!strncmp ("dio",   		argv[2], 2) && Product_ID != EDDY_S4M)  view_dio ();
 		if (!strncmp ("snmp",   	argv[2], 2))  view_snmp ();
+		
+		if (!strncmp ("gps",   	argv[2], 2))  view_GDM_GPS ();
+		
 		return 0; 
 		}
 
@@ -337,23 +349,38 @@ int no;
 		
 	sprintf (CFG_SYS.ddns,		"%c%c%c%c",     203,32,117,1);
 	sprintf (CFG_SYS.portview,	"%c%c%c%c",     0,0,0,0);
-	sprintf (CFG_SYS.device_name,"Eddy");
-	sprintf (CFG_SYS.username,	"eddy");
-	sprintf (CFG_SYS.password,	"99999999");
+	
+	sprintf (CFG_SYS.device_name,"DASAN_00");
+	sprintf (CFG_SYS.username,	"admin");
+	sprintf (CFG_SYS.password,	"admin");
 	CFG_SYS.portview_port_no		= 4000;
+	
 	CFG_SYS.telnet_server		= SB_ENABLE;
 	CFG_SYS.ftp_server			= SB_ENABLE;
 	CFG_SYS.web_server			= SB_ENABLE;
 	CFG_SYS.ssh_server			= SB_DISABLE;
-	CFG_SYS.target_agent			= SB_DISABLE;
-	sprintf (CFG_SYS.website,	"http://www.sysbas.com");
-	sprintf (CFG_SYS.contact,	"tech@sysbas.com");
-	sprintf (CFG_SYS.ddnsuser,	"eddy");
-	sprintf (CFG_SYS.ddnspass,	"99999999");
+	CFG_SYS.target_agent		= SB_DISABLE;
+
+	sprintf (CFG_SYS.website,	"http://www.dsintek.com");   //// "http://www.sysbas.com");
+	sprintf (CFG_SYS.contact,	"sales@dsintek.com");   	//// "tech@sysbas.com");
+	sprintf (CFG_SYS.ddnsuser,	"admin");   					//// "eddy");
+	sprintf (CFG_SYS.ddnspass,	"administrator");
+	
 	sprintf (CFG_SYS.id,		"%s",			SB_DEVICE_ID);		
+
+  //--
+	sprintf (CFG_SYS.GDM_XXzero,	"0");
+	sprintf (CFG_SYS.GDM_YYzero,	"0");
+	sprintf (CFG_SYS.GDM_DDzero,	"0");
+	//
+	CFG_SYS.GDM_USEmode			= 1;  // "GDM_EC:: USE-GPS/Encoder! {-1:none 1:ON 0:OFF(encoder)}
+  //--
+
+	//--
 	SB_WriteConfig (CFGFILE_FLASH_SYSTEM, (char *)&CFG_SYS,  sizeof(struct SB_SYSTEM_CONFIG));
 	SB_WriteConfig (CFGFILE_ETC_SYSTEM,   (char *)&CFG_SYS,  sizeof(struct SB_SYSTEM_CONFIG));	
-	
+	//--
+
 	
 	for (no=0; no<SB_MAX_SIO_PORT; no++)
 		{
@@ -433,7 +460,7 @@ int no;
 	CFG_SNMP.trap_option			= 1;
 	CFG_SNMP.v1_readwrite			= 0;
 	CFG_SNMP.v3_readwrite			= 0;
-	sprintf (CFG_SNMP.v3_username,	"eddy");
+	sprintf (CFG_SNMP.v3_username,	"admin");
 	sprintf (CFG_SNMP.v3_password,	"administrator");
 	SB_WriteConfig (CFGFILE_FLASH_SNMP, (char *)&CFG_SNMP,  sizeof(struct SB_SNMP_CONFIG));
 	SB_WriteConfig (CFGFILE_ETC_SNMP,   (char *)&CFG_SNMP,  sizeof(struct SB_SNMP_CONFIG));
@@ -756,6 +783,44 @@ char mac[30],x1,x2;
 				return 0;			
 		return 1;
 		}
+
+  //--------------------------------------------------------------------------------------------
+    if (!strncmp("zero_x", gv1, 6 ))
+		{
+		gv2[15] = 0x00;
+		memset (CFG_SYS.GDM_XXzero, 0x00, 16);
+		strcpy (CFG_SYS.GDM_XXzero, gv2);
+		return 1;
+		}
+
+    if (!strncmp("zero_y", gv1, 6 ))
+		{
+		gv2[15] = 0x00;
+		memset (CFG_SYS.GDM_YYzero, 0x00, 16);
+		strcpy (CFG_SYS.GDM_YYzero, gv2);
+		return 1;
+		}
+
+    if (!strncmp("zero_dist", gv1, 6 ))
+		{
+		gv2[15] = 0x00;
+		memset (CFG_SYS.GDM_DDzero, 0x00, 16);
+		strcpy (CFG_SYS.GDM_DDzero, gv2);
+		return 1;
+		}
+
+    if (!strncmp("usegps", gv1, 6 ))  //6	//"useGPS"...{argv[1][i] = tolower( argv[1][i] );}
+		{
+		if (!strncmp("on", gv2, 2 )) 			//"ON"....{argv[2][i] = tolower( argv[2][i] );}
+			CFG_SYS.GDM_USEmode = 1;
+		else
+			if (!strncmp("off", gv2, 3 )) 		//"OFF"...{argv[2][i] = tolower( argv[2][i] );}
+				CFG_SYS.GDM_USEmode = 0;
+			else
+				return 0;
+		return 1;
+		}
+  //--------------------------------------------------------------------------------------------
 
 	return 0;
 } 
@@ -1335,6 +1400,9 @@ void help()
 	printf("def view gpio      ;  Print GPIO Configuration\n");		
 	if (Product_ID != EDDY_S4M)
 		printf("def view dio       ;  Print DIO Configuration\n");		
+		
+	printf("def view gps       ;  Print GDM_GPS Configuration\n");
+		
 	printf("---<Save & Factory>-------------------------------------------------------\n");	
 	printf("def factory        ;  Factory Default\n");
 	printf("def save           ;  Save to Flash (Configuration Data)\n");
@@ -1441,6 +1509,14 @@ void help()
 	printf("def wifi gateway        <Gateway IP address>\n" );	
 	printf("def wifi mask           <Subnet Mask address>\n" );	
 	printf("def wifi dns            <DNS IP address>\n" );	
+	
+	printf("---< GDM_GPS Config >------------------------------------------------------\n");	
+	printf("def zero_x        <string>            ; <123456.1234> zero_position_X \n");
+	printf("def zero_y        <string>            ; <345678.1234> zero_position_Y \n");
+	printf("def zero_dist     <string>            ; <123.123> zero_position_distance \n");
+	//
+	printf("def useGPS        <ON/OFF>            ; <ON> useGPS==ON/OFF \n");
+	
 	printf("--------------------------------------------------------------------------\n");	
 }
 
@@ -1451,7 +1527,8 @@ struct in_addr addr;
 char ver[20];
 union { char c[4]; unsigned int i; } q;
 
-    printf("=< Welcome to Eddy Configuration Manager >=========================\n");
+//    printf("=< Welcome to Eddy Configuration Manager >=========================\n");
+    printf("=< Welcome to GDM Configuration Manager >=========================\n");
     SB_GetVersion ('B', ver);
     printf("BootLoader Version : %s\n", ver);
     SB_GetVersion ('K', ver);
@@ -1850,4 +1927,28 @@ unsigned short hexa = 0x0001, hex;
 		}
 }
 
+
+//=============================================================
+void view_GDM_GPS()
+{
+struct in_addr addr;
+union { char c[4]; unsigned int i; } q;
+		
+	CFG_SYS.GDM_XXzero[15] = 0x00;
+	CFG_SYS.GDM_YYzero[15] = 0x00;
+	CFG_SYS.GDM_DDzero[15] = 0x00;
+	printf("-< GDM_GPS : Zero-Configure >---------------------------------------\n");	
+		
+	printf("GDM zero_position_X: %s\n", CFG_SYS.GDM_XXzero);
+	printf("GDM zero_position_Y: %s\n", CFG_SYS.GDM_YYzero);
+	printf("GDM zero_distance  : %s\n", CFG_SYS.GDM_DDzero);
+		
+	printf("GDM useGPS         : %s\n", (CFG_SYS.GDM_USEmode == 0) ? "OFF" : "ON");				
+}
+//=============================================================
+
+
+//=============================================================
+//=============================================================
+//=============================================================
 

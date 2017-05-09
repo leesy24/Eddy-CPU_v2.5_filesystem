@@ -10,12 +10,12 @@ install:
 	#@echo "Making ramdisk image..."
 	#$(TOOL) -b 8192 -d root -D device_table.txt ramdisk
 	#../tool/genext2fs  -U -b 5110 -d root -D device_table.txt ramdisk
-	#../tool/genext2fs  -U -b 7158 -d root -D device_table.txt ramdisk
+	#../tool/genext2fs.exe  -U -b 7158 -d root -D device_table.txt ramdisk
 	#../tool/mkcramfs   -q -D device_table.txt root ramdisk
-	../tool/genext2fs  -U -b 10240 -N 1024 -d root -D device_table.txt ramdisk
+	../tool/genext2fs.exe  -U -b 10240 -N 1024 -d root -D device_table.txt ramdisk
 	gzip -vf9 ramdisk
 	test -f ramdisk.gz 
-	../tool/mkimage -A arm -O linux -T ramdisk -C gzip -a 0 -e 0 -n $(FW_NAME) -d ./ramdisk.gz $(FW_NAME) 
+	../tool/mkimage.exe -A arm -O linux -T ramdisk -C gzip -a 0 -e 0 -n $(FW_NAME) -d ./ramdisk.gz $(FW_NAME) 
 	test -f $(FW_NAME) 
 	mv $(FW_NAME) $(FIRMWARE_DIR)/ 
 
@@ -49,6 +49,26 @@ release:
 	cp -f ../src/Eddy_APPs/test_tcp_client		root/sbin
 	cp -f ../src/Eddy_APPs/test_udp_server		root/sbin
 	cp -f ../src/Eddy_APPs/test_udp_client		root/sbin
+
+	cp -f ../src/Eddy_APPs/udp_DRFB				root/sbin
+	cp -f ../src/Eddy_APPs/udp_DRFG				root/sbin
+	cp -f ../src/Eddy_APPs/udp_DVSCPU			root/sbin
+	
+	cp -f ../src/Eddy_APPs/udp				root/sbin
+	##------------------------!
+	cp -f ../src/Eddy_APPs/udp_GDM_EC			root/sbin
+	cp -f ../src/Eddy_APPs/udp_ORG				root/sbin
+	##------------------------!for-udp-change!!--from-pinetd!
+	##------------------------!"""( # cp -rp udp_GDM_EC udp )"""
+	##-----------------------------!=======================!!!!!
+	cp -f ../src/Eddy_APPs/udp_DPSscan			root/sbin
+	##-----------------------------!=======================!!!!!
+		
+	cp -f ../src/Eddy_APPs/tcp_broadcast			root/sbin
+	##--------------------!<============ "c:> cp tcp16broadcast tcp_broadcast"
+
+	cp -f ../src/Eddy_APPs/tcp_client			root/sbin
+	##--------------------!<============ "..... tcp_client_201504_mRIO_A02~"
 	
 	cp -f ../src/RT73/Module/rt73.ko			root/etc/drivers
 	cp -f ../src/RT73/Module/rt73.bin			root/etc/drivers
@@ -78,4 +98,6 @@ release:
 	cp -f ../src/vsftpd-2.0.5/vsftpd			root/usr/sbin
 	cp -f ../src/target-agent/tae 				root/sbin
 	cp -f ../src/gdbserver/gdbserver			root/sbin		
+
+	chmod 755 root/usr/local/www/cgi-bin/*.cgi
 

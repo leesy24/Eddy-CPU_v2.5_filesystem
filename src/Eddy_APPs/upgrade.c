@@ -6,7 +6,9 @@
 #include "include/sb_include.h"
 #include "include/sb_define.h"
 #include "include/sb_ioctl.h"
+#include "include/sb_extern.h"  ////
 #include <fcntl.h>
+
 
 struct erase_info_user {
 	uint32_t start;
@@ -249,6 +251,9 @@ up:
 
 	crc16A = copy_flash (fw_fd, mtd_fd, fw_size);
 	if (crc16A == 0) goto end;
+	
+	if (crc16A == -1) goto end;  ////---COPY-Error!
+	
 	printf ("Flash Write OK\n");
 	if (web_flag)	printf("<BR>");
 	crc16B = verify_flash(mtd_fd, fw_size);
@@ -281,7 +286,7 @@ int erase_flash (int fd, unsigned int bytes)
 	struct mtd_info_user info;
 	int page_num =0;
 
-	ioctl (fd, MEMGETINFO, &info);
+	ioctl (fd, MEMGETINFO, &info);    SB_msleep( 1000 );   ////
 
 	if (info.erasesize == 0x2000) 
 		{
@@ -295,7 +300,7 @@ int erase_flash (int fd, unsigned int bytes)
 
 	erase.start = sp;
 	erase.length = bytes ;
-	ret = (ioctl (fd, MEMERASE, &erase));
+	ret = (ioctl (fd, MEMERASE, &erase));    SB_msleep( 1000 );   ////
 	if (ret < 0)
 	{
 		perror ("MEMERASE");
@@ -306,16 +311,22 @@ int erase_flash (int fd, unsigned int bytes)
 //==============================================================================
 unsigned int copy_flash (int fw_fd, int mtd_fd, int file_size)
 {
-#define  READ_SIZE	128*1056
+// #define  READ_SIZE	128*1056  //...org
+#define  READ_SIZE	1056  // 20*1056
 	char buffer [READ_SIZE];
 	int read_size, r_len, w_len, i, total_len, write_len=0;
 	unsigned int crc16A=0xffff;
+	
+	unsigned long t1; 	////SB_GetTick (Void);
+	int lcnt=0;
 	
 	total_len = file_size;
 	printf ("\n");
 	
 	while (1)
 	{
+		t1 = SB_GetTick ();  ////
+		
 		if (file_size < READ_SIZE) 
 			read_size = file_size;
 		else
@@ -332,7 +343,21 @@ unsigned int copy_flash (int fw_fd, int mtd_fd, int file_size)
 		{
 			crc16A = get_CRC16 (buffer[i], crc16A);
 		}
+		
+		
 		w_len = write (mtd_fd, buffer, r_len);
+		////
+		/**
+		w_len=0;
+		for (i=0;i<r_len;i++) 
+		{
+			write (mtd_fd, buffer, 1);
+			w_len++;
+		}
+		**/
+		SB_msleep( 15 );   // ok1@10msec
+		
+		
 		if (w_len != r_len) 
 		{
 			printf ("MTD write Error! write=%d read=%d  point=%d\n", w_len, r_len ,  file_size);
@@ -341,13 +366,29 @@ unsigned int copy_flash (int fw_fd, int mtd_fd, int file_size)
 
 		file_size -= w_len;
 		write_len += w_len;
-
-		if (web_flag==0)
-			printf ("[1A%7d  (%7d bytes)\n", write_len, total_len);
-		else
-			printf ("%7d  (%7d bytes)\n<BR>", write_len, total_len);
-			
-		if (file_size == 0) return crc16A;
+		
+		
+		lcnt++;
+		if ( (lcnt % 100) == 0 )
+		{
+			if (web_flag==0)
+				printf ("[1A%7d  (%7d bytes)\n", write_len, total_len);
+			else
+				printf ("%7d  (%7d bytes)\n<BR>", write_len, total_len);
+		}
+		
+		
+		if (file_size == 0) {
+				printf ("%7d  (%7d bytes)==Wite_Done==!!! \n", write_len, total_len);
+			return crc16A;
+		}
+		
+		if ( (SB_GetTick() - t1) > 1000)  // 5000@20  ////
+		{
+			printf ("Firmware Write-COPY Error!!!\n");
+			return -1;
+		}
+		
 	}
 }
 //==============================================================================
@@ -414,7 +455,6 @@ void chk_old_version ()
 unsigned char buff[60];
 int fd, i;
 
-	
 	fd = open ("/etc/k_name", O_RDWR);
 	if (fd <= 0) return;
 	lseek (fd, 0l, 0);
