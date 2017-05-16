@@ -9,13 +9,13 @@ FIRMWARE_DIR	=	../firmware
 install:
 	#@echo "Making ramdisk image..."
 	#$(TOOL) -b 8192 -d root -D device_table.txt ramdisk
-	#../tool/genext2fs  -U -b 5110 -d root -D device_table.txt ramdisk
-	#../tool/genext2fs  -U -b 7158 -d root -D device_table.txt ramdisk
+	#../tool/genext2fs.exe  -U -b 5110 -d root -D device_table.txt ramdisk
+	#../tool/genext2fs.exe  -U -b 7158 -d root -D device_table.txt ramdisk
 	#../tool/mkcramfs   -q -D device_table.txt root ramdisk
-	../tool/genext2fs  -U -b 10240 -N 1024 -d root -D device_table.txt ramdisk
+	../tool/genext2fs.exe  -U -b 10240 -N 1024 -d root -D device_table.txt ramdisk
 	gzip -vf9 ramdisk
 	test -f ramdisk.gz 
-	../tool/mkimage -A arm -O linux -T ramdisk -C gzip -a 0 -e 0 -n $(FW_NAME) -d ./ramdisk.gz $(FW_NAME) 
+	../tool/mkimage.exe -A arm -O linux -T ramdisk -C gzip -a 0 -e 0 -n $(FW_NAME) -d ./ramdisk.gz $(FW_NAME) 
 	test -f $(FW_NAME) 
 	mv $(FW_NAME) $(FIRMWARE_DIR)/ 
 
